@@ -1,0 +1,6 @@
+2025-05-01 12:57:58 | Plate: CZZOFSE | Status: Unauthorized
+2025-05-01 12:58:10 | Plate: CZZOFSE | Status: Unauthorized
+2025-05-01 13:00:37 | Plate: 29433185 | Status: Unauthorized
+2025-05-01 13:02:23 | Plate: 29433185 | Status: Unauthorized
+2025-05-01 13:05:27 | Plate: CZZOFSE | Status: Unauthorized
+2025-05-01 13:05:45 | Plate: 29433185 | Status: Unauthorized

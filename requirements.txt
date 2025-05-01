@@ -1,0 +1,7 @@
+flask
+opencv-python
+easyocr
+numpy
+Pillow
+torch
+yolov5  # if using YOLOv5 via Ultralytics
