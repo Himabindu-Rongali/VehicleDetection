@@ -25,7 +25,7 @@
         }
         form {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
         input[type="file"] {
             margin: 10px;
@@ -33,6 +33,22 @@
         input[type="submit"] {
             padding: 10px 20px;
             background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .view-logs-btn {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        .view-logs-btn a {
+            text-decoration: none;
+        }
+        .view-logs-btn button {
+            padding: 10px 20px;
+            background: #28a745;
             color: white;
             border: none;
             border-radius: 6px;
@@ -62,12 +78,22 @@
 <body>
     <div class="container">
         <h1>AI Vehicle Recognition System</h1>
+        
+        <!-- Upload & Detect Form -->
         <form method="POST" enctype="multipart/form-data">
             <input type="file" name="image" required>
             <br>
             <input type="submit" value="Upload & Detect">
         </form>
 
+        <!-- View Logs Button (separate from form) -->
+        <div class="view-logs-btn">
+            <a href="/logs">
+                <button type="button">View Logged Details</button>
+            </a>
+        </div>
+
+        <!-- Detection Results -->
         {% if file_path %}
             <div class="results">
                 <h3>Detected License Plates:</h3>
