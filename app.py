@@ -52,10 +52,28 @@ def save_log(plate, status):
 def view_logs():
     conn = sqlite3.connect('vehicles.db')
     c = conn.cursor()
-    c.execute("SELECT timestamp, plate, status FROM logs ORDER BY timestamp DESC")
+    
+    # Get the page number from the query parameter
+    page = request.args.get('page', 1, type=int)
+    
+    # Set the number of logs per page
+    logs_per_page = 15
+    offset = (page - 1) * logs_per_page
+    
+    # Get the logs for the current page
+    c.execute("SELECT timestamp, plate, status FROM logs ORDER BY timestamp DESC LIMIT ? OFFSET ?", (logs_per_page, offset))
     logs = c.fetchall()
+    
+    # Get the total number of logs for pagination
+    c.execute("SELECT COUNT(*) FROM logs")
+    total_logs = c.fetchone()[0]
+    
     conn.close()
-    return render_template('logs.html', logs=logs)
+    
+    # Calculate total number of pages
+    total_pages = (total_logs + logs_per_page - 1) // logs_per_page
+    
+    return render_template('logs.html', logs=logs, page=page, total_pages=total_pages)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
