@@ -48,6 +48,14 @@ def save_log(plate, status):
 
     with open("detection_log.txt", "a") as f:
         f.write(f"{timestamp} - Plate: {plate} - Status: {status}\n")
+@app.route('/logs')
+def view_logs():
+    conn = sqlite3.connect('vehicles.db')
+    c = conn.cursor()
+    c.execute("SELECT timestamp, plate, status FROM logs ORDER BY timestamp DESC")
+    logs = c.fetchall()
+    conn.close()
+    return render_template('logs.html', logs=logs)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
