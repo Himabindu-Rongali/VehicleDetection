@@ -25,6 +25,28 @@
             margin-top: 20px;
             font-size: 18px;
         }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .pagination a {
+            padding: 8px 16px;
+            margin: 0 5px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+        .pagination a:hover {
+            background-color: #0056b3;
+        }
+        .pagination span {
+            padding: 8px 16px;
+            margin: 0 5px;
+            background-color: #f2f2f2;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -43,7 +65,19 @@
         </tr>
         {% endfor %}
     </table>
+    
+    <div class="pagination">
+        {% if page > 1 %}
+        <a href="{{ url_for('view_logs', page=page-1) }}">Prev</a>
+        {% endif %}
+        
+        <span>Page {{ page }} of {{ total_pages }}</span>
+        
+        {% if page < total_pages %}
+        <a href="{{ url_for('view_logs', page=page+1) }}">Next</a>
+        {% endif %}
+    </div>
+    
     <a class="back-link" href="/">← Back to Home</a>
 </body>
 </html>
-
