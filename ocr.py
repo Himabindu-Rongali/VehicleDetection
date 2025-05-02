@@ -1,10 +1,18 @@
-import easyocr
+from paddleocr import PaddleOCR
 import cv2
 
-reader = easyocr.Reader(['en'])  # Add languages like 'hi' for Hindi
+ocr = PaddleOCR(use_angle_cls=True, lang='en')
 
 def read_plate(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    result = reader.readtext(gray)
-    plate_numbers = [res[1] for res in result if len(res[1]) > 5]
+    result = ocr.ocr(gray, cls=True)
+    plate_numbers = []
+
+    if result:
+        for line in result:
+            if line is not None:
+                for box in line:
+                    text = box[1][0]
+                    if 5 <= len(text) <= 15:
+                        plate_numbers.append(text)
     return plate_numbers

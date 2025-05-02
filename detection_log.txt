@@ -4,3 +4,31 @@
 2025-05-01 13:02:23 | Plate: 29433185 | Status: Unauthorized
 2025-05-01 13:05:27 | Plate: CZZOFSE | Status: Unauthorized
 2025-05-01 13:05:45 | Plate: 29433185 | Status: Unauthorized
+2025-05-01 13:19:05 - Plate: 29333185 - Status: Unauthorized
+2025-05-01 13:19:05 - Plate: X5P7F - Status: Unauthorized
+2025-05-01 13:22:18 - Plate: 29333185 - Status: Unauthorized
+2025-05-01 13:22:18 - Plate: X5P7F - Status: Unauthorized
+2025-05-01 13:24:52 - Plate: 29333185 - Status: Unauthorized
+2025-05-01 13:24:52 - Plate: X5P7F - Status: Unauthorized
+2025-05-01 13:26:31 - Plate: 29333185 - Status: Unauthorized
+2025-05-01 13:26:31 - Plate: X5P7F - Status: Unauthorized
+2025-05-01 13:30:19 - Plate: 29333185 - Status: Unauthorized
+2025-05-01 13:30:19 - Plate: X5P7F - Status: Unauthorized
+2025-05-02 12:09:07 - Plate: 29333185 - Status: Unauthorized
+2025-05-02 12:09:07 - Plate: X5P7F - Status: Unauthorized
+2025-05-02 12:14:35 - Plate: 29333185 - Status: Unauthorized
+2025-05-02 12:23:21 - Plate: MSG6JYO8 - Status: Unauthorized
+2025-05-02 12:24:06 - Plate: MS66YOB - Status: Unauthorized
+2025-05-02 12:24:07 - Plate: MS6SYOB - Status: Unauthorized
+2025-05-02 12:24:39 - Plate: MS66YOB - Status: Unauthorized
+2025-05-02 12:24:40 - Plate: MS6SYOB - Status: Unauthorized
+2025-05-02 12:25:38 | Plate: M666 YOB | Status: Unauthorized
+2025-05-02 12:25:59 | Plate: MS66 YOB | Status: Unauthorized
+2025-05-02 12:26:01 | Plate: MS66 YOB | Status: Unauthorized
+2025-05-02 12:26:44 | Plate: CZZOFSE | Status: Unauthorized
+2025-05-02 12:27:02 | Plate: 29433185 | Status: Unauthorized
+2025-05-02 12:54:23 - Plate: DA59YCL - Status: Unauthorized
+2025-05-02 12:59:19 - Plate: MH12NE8922 - Status: Unauthorized
+2025-05-02 12:59:20 - Plate: MH12NE8922 - Status: Unauthorized
+2025-05-02 12:59:56 - Plate: DA59YCL - Status: Unauthorized
+2025-05-02 13:02:21 - Plate: M666Y0B - Status: Unauthorized

@@ -1,86 +1,61 @@
+<!-- templates/index.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>AI Vehicle Recognition System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <title>AI Vehicle Recognition</title>
     <style>
         body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(to right, #f5f7fa, #c3cfe2);
+            font-family: Arial, sans-serif;
+            background: #f5f7fa;
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
         }
-
         .container {
-            background-color: white;
+            max-width: 960px;
+            margin: auto;
             padding: 40px;
-            margin-top: 50px;
+            background: white;
+            margin-top: 40px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
             border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-            width: 90%;
-            max-width: 700px;
+        }
+        h1 {
+            color: #333;
             text-align: center;
         }
-
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 30px;
-        }
-
         form {
+            text-align: center;
             margin-bottom: 30px;
         }
-
         input[type="file"] {
-            margin: 10px 0;
+            margin: 10px;
         }
-
         input[type="submit"] {
-            background-color: #3498db;
-            border: none;
-            padding: 12px 24px;
+            padding: 10px 20px;
+            background: #007bff;
             color: white;
+            border: none;
             border-radius: 6px;
-            font-size: 16px;
             cursor: pointer;
-            transition: background 0.3s ease;
         }
-
-        input[type="submit"]:hover {
-            background-color: #2980b9;
-        }
-
-        img {
+        .results {
             margin-top: 20px;
-            max-width: 100%;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-
-        ul {
-            list-style: none;
-            padding: 0;
-            text-align: left;
+        .results h3 {
+            color: #444;
         }
-
-        li {
-            background-color: #ecf0f1;
-            padding: 10px 15px;
+        .plate {
+            padding: 10px;
+            background-color: #e7f5ff;
+            border: 1px solid #bee3f8;
             margin: 10px 0;
-            border-radius: 8px;
-            font-weight: bold;
+            border-radius: 6px;
         }
-
-        .authorized {
-            color: green;
-        }
-
-        .unauthorized {
-            color: red;
+        img {
+            max-width: 100%;
+            border: 2px solid #007bff;
+            border-radius: 10px;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -88,23 +63,22 @@
     <div class="container">
         <h1>AI Vehicle Recognition System</h1>
         <form method="POST" enctype="multipart/form-data">
-            <input type="file" name="image" required><br>
+            <input type="file" name="image" required>
+            <br>
             <input type="submit" value="Upload & Detect">
         </form>
 
-        {% if result %}
-            <h2>Detection Results</h2>
-            <img src="{{ file_path }}" alt="Uploaded Image"><br><br>
-            <ul>
-            {% for plate, status in result %}
-                <li>
-                    Plate: {{ plate }} — 
-                    <span class="{{ 'authorized' if status == 'Authorized' else 'unauthorized' }}">
-                        {{ status }}
-                    </span>
-                </li>
-            {% endfor %}
-            </ul>
+        {% if file_path %}
+            <div class="results">
+                <h3>Detected License Plates:</h3>
+                {% for plate, status in result %}
+                    <div class="plate">
+                        <strong>{{ plate }}</strong> - <em>{{ status }}</em>
+                    </div>
+                {% endfor %}
+                <h3>Processed Image:</h3>
+                <img src="{{ file_path }}" alt="Processed Image with Bounding Boxes">
+            </div>
         {% endif %}
     </div>
 </body>

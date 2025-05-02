@@ -1,86 +1,94 @@
 from flask import Flask, render_template, request
-import cv2
-import torch
-import easyocr
 import os
+import cv2
+from ultralytics import YOLO
+from ocr import read_plate
 import sqlite3
 from datetime import datetime
 
 app = Flask(__name__)
+
 UPLOAD_FOLDER = 'static/uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Load YOLOv5 model
-model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'bmp', 'gif', 'webp'}
 
-# Load OCR
-reader = easyocr.Reader(['en'])
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Setup SQLite database
-conn = sqlite3.connect('vehicles.db', check_same_thread=False)
-c = conn.cursor()
-c.execute('''CREATE TABLE IF NOT EXISTS logs (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                plate TEXT,
-                timestamp TEXT,
-                status TEXT
-            )''')
-conn.commit()
+model = YOLO("yolov8n.pt")  # Replace with custom model if available
 
-# Load authorized plates
+def create_db():
+    conn = sqlite3.connect('vehicles.db')
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS logs
+                 (timestamp TEXT, plate TEXT, status TEXT)''')
+    conn.commit()
+    conn.close()
+
+create_db()
+
 def load_authorized_plates():
-    try:
-        with open('authorized_vehicles.txt', 'r') as f:
-            return [line.strip().upper() for line in f]
-    except FileNotFoundError:
-        return []
+    if os.path.exists("authorized_vehicles.txt"):
+        with open("authorized_vehicles.txt", "r") as f:
+            return set(line.strip().upper() for line in f if line.strip())
+    return set()
 
 authorized_plates = load_authorized_plates()
 
-# Log to text file
-def log_to_file(plate, timestamp, status):
+def save_log(plate, status):
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    conn = sqlite3.connect('vehicles.db')
+    c = conn.cursor()
+    c.execute("INSERT INTO logs (timestamp, plate, status) VALUES (?, ?, ?)",
+              (timestamp, plate, status))
+    conn.commit()
+    conn.close()
+
     with open("detection_log.txt", "a") as f:
-        f.write(f"{timestamp} | Plate: {plate} | Status: {status}\n")
+        f.write(f"{timestamp} - Plate: {plate} - Status: {status}\n")
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    result = []
+    file_path = None
+
     if request.method == 'POST':
-        # Save uploaded image
         file = request.files['image']
-        filepath = os.path.join(UPLOAD_FOLDER, file.filename)
-        file.save(filepath)
+        if file and allowed_file(file.filename):
+            filename = file.filename
+            filepath = os.path.join(UPLOAD_FOLDER, filename)
+            file.save(filepath)
+            file_path = '/' + filepath
 
-        # Load and process image
-        img = cv2.imread(filepath)
-        results = model(filepath)
-        predictions = results.xyxy[0]
+            img = cv2.imread(filepath)
+            results = model(filepath)
+            predictions = results[0].boxes.data.tolist()
 
-        found_plates = []
+            for *box, conf, cls in predictions:
+                x1, y1, x2, y2 = map(int, box)
+                cropped = img[y1:y2, x1:x2]
+                plates = read_plate(cropped)
 
-        for *box, conf, cls in predictions:
-            x1, y1, x2, y2 = map(int, box)
-            cropped = img[y1:y2, x1:x2]
-            gray = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
-            text = reader.readtext(gray)
+                for plate_text in plates:
+                    plate_text = plate_text.replace(" ", "").upper()
+                    if 5 <= len(plate_text) <= 12:
+                        status = "Authorized" if plate_text in authorized_plates else "Unauthorized"
+                        save_log(plate_text, status)
+                        result.append((plate_text, status))
 
-            for result in text:
-                plate = result[1].strip().upper()
-                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                status = 'Authorized' if plate in authorized_plates else 'Unauthorized'
+                        color = (0, 255, 0) if status == "Authorized" else (0, 0, 255)
+                        cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
+                        label = f"{plate_text} ({status})"
+                        cv2.putText(img, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
+                        break  # Stop after detecting one valid plate per box
 
-                # Log to database
-                c.execute("INSERT INTO logs (plate, timestamp, status) VALUES (?, ?, ?)",
-                          (plate, timestamp, status))
-                conn.commit()
+            output_path = os.path.join(UPLOAD_FOLDER, "processed_" + filename)
+            cv2.imwrite(output_path, img)
+            file_path = '/' + output_path
 
-                # Log to file
-                log_to_file(plate, timestamp, status)
-
-                found_plates.append((plate, status))
-
-        return render_template('index.html', result=found_plates, file_path=filepath)
-
-    return render_template('index.html')
+    return render_template('index.html', result=result, file_path=file_path)
 
 if __name__ == '__main__':
     app.run(debug=True)
