@@ -3,27 +3,60 @@
 <head>
     <title>Detection Logs</title>
     <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #fdfdfd;
+        }
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            width: 80%;
+            margin: 30px auto 20px auto;
+        }
+        .header-title {
+            flex: 1;
+            text-align: center;
+            color: brown; /* Brown color */
+            font-size: 32px;
+            font-family: Georgia, serif;
+            font-weight: bold;
+        }
+        .download-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .download-buttons select,
+        .download-buttons button {
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            background-color:#8B4513; /* Coral */
+            color: white;
+            font-weight: bold;
+        }
+        .download-buttons select {
+            background-color: #8B4513; /* Light Salmon */
+        }
         table {
             border-collapse: collapse;
             width: 80%;
-            margin: auto;
-        }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 10px;
-            text-align: center;
+            margin: 20px auto;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
         th {
-            background-color: #f2f2f2;
+            background-color:#20b2aa; /* Indigo */
+            color:white;
+            padding: 12px;
+            font-size: 16px;
         }
-        h2 {
+        td {
+            background-color: #f0f8ff; /* Alice Blue */
+            color: #333;
+            padding: 10px;
             text-align: center;
-        }
-        .back-link {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
-            font-size: 18px;
         }
         .pagination {
             display: flex;
@@ -33,13 +66,13 @@
         .pagination a {
             padding: 8px 16px;
             margin: 0 5px;
-            background-color: #007bff;
+            background-color: #20b2aa;
             color: white;
             border-radius: 4px;
             text-decoration: none;
         }
         .pagination a:hover {
-            background-color: #0056b3;
+            background-color: #2e8b57;
         }
         .pagination span {
             padding: 8px 16px;
@@ -47,10 +80,29 @@
             background-color: #f2f2f2;
             border-radius: 4px;
         }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+            font-size: 18px;
+            text-decoration: none;
+            color: #444;
+        }
     </style>
 </head>
 <body>
-    <h2>Vehicle Detection Logs</h2>
+    <div class="header-section">
+        <div class="header-title">Vehicle Detection Logs</div>
+        <div class="download-buttons">
+            <select id="file-format">
+                <option disabled selected>Download as...</option>
+                <option value="csv">CSV</option>
+                <option value="pdf">PDF</option>
+            </select>
+            <button onclick="downloadLogs()">Download</button>
+        </div>
+    </div>
+
     <table>
         <tr>
             <th>Timestamp</th>
@@ -77,7 +129,15 @@
         <a href="{{ url_for('view_logs', page=page+1) }}">Next</a>
         {% endif %}
     </div>
-    
+
     <a class="back-link" href="/">← Back to Home</a>
+
+    <script>
+        function downloadLogs() {
+            var format = document.getElementById('file-format').value;
+            if (!format) return alert('Please select a format to download.');
+            window.location.href = '/download/' + format;
+        }
+    </script>
 </body>
 </html>
