@@ -34,6 +34,7 @@ create_db()
 def load_authorized_plates():
     if os.path.exists("authorized_vehicles.txt"):
         with open("authorized_vehicles.txt", "r") as f:
+            # Strip spaces and newlines from each line and convert to uppercase
             return set(line.strip().upper() for line in f if line.strip())
     return set()
 
@@ -50,6 +51,15 @@ def save_log(plate, status):
 
     with open("detection_log.txt", "a") as f:
         f.write(f"{timestamp} - Plate: {plate} - Status: {status}\n")
+
+# Function to fetch all logs from the database
+def get_all_logs():
+    conn = sqlite3.connect('vehicles.db')
+    c = conn.cursor()
+    c.execute("SELECT timestamp, plate, status FROM logs ORDER BY timestamp DESC")
+    logs = c.fetchall()
+    conn.close()
+    return logs
 
 @app.route('/download/<file_format>')
 def download_logs(file_format):
@@ -98,18 +108,24 @@ def download_logs(file_format):
 
 @app.route('/logs')
 def view_logs():
-    conn = sqlite3.connect('vehicles.db')
-    c = conn.cursor()
-    page = request.args.get('page', 1, type=int)
-    logs_per_page = 15
-    offset = (page - 1) * logs_per_page
-    c.execute("SELECT timestamp, plate, status FROM logs ORDER BY timestamp DESC LIMIT ? OFFSET ?", (logs_per_page, offset))
-    logs = c.fetchall()
-    c.execute("SELECT COUNT(*) FROM logs")
-    total_logs = c.fetchone()[0]
-    conn.close()
-    total_pages = (total_logs + logs_per_page - 1) // logs_per_page
-    return render_template('logs.html', logs=logs, page=page, total_pages=total_pages)
+    page = int(request.args.get('page', 1))
+    sort_type = request.args.get('sort', 'authorized')  # Default sort by 'authorized'
+    per_page = 10
+    offset = (page - 1) * per_page
+
+    # Fetch all logs from DB or list
+    logs = get_all_logs()  # Replace with your actual data fetch method
+
+    # Sort logic
+    if sort_type == 'authorized':
+        logs = [log for log in logs if log[2].lower() == 'authorized']
+    elif sort_type == 'unauthorized':
+        logs = [log for log in logs if log[2].lower() == 'unauthorized']
+
+    total_pages = (len(logs) + per_page - 1) // per_page
+    paginated_logs = logs[offset:offset + per_page]
+
+    return render_template('logs.html', logs=paginated_logs, page=page, total_pages=total_pages, sort_type=sort_type)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -134,17 +150,27 @@ def index():
                 plates = read_plate(cropped)
 
                 for plate_text in plates:
+                    # Strip spaces and convert to uppercase
                     plate_text = plate_text.replace(" ", "").upper()
-                    if 5 <= len(plate_text) <= 12:
-                        status = "Authorized" if plate_text in authorized_plates else "Unauthorized"
-                        save_log(plate_text, status)
-                        result.append((plate_text, status))
+                    print(f"Detected Plate: {plate_text}")
+                    
+                    # Check if the plate is in authorized plates
+                    if plate_text in authorized_plates:
+                        status = "Authorized"
+                    else:
+                        status = "Unauthorized"
+                    
+                    print(f"Plate Status: {status}")
+                    
+                    save_log(plate_text, status)
+                    result.append((plate_text, status))
 
-                        color = (0, 255, 0) if status == "Authorized" else (0, 0, 255)
-                        cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
-                        label = f"{plate_text} ({status})"
-                        cv2.putText(img, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
-                        break
+                    # Draw bounding box and plate text
+                    color = (0, 255, 0) if status == "Authorized" else (0, 0, 255)
+                    cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
+                    label = f"{plate_text} ({status})"
+                    cv2.putText(img, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
+                    break
 
             output_path = os.path.join(UPLOAD_FOLDER, "processed_" + filename)
             cv2.imwrite(output_path, img)
